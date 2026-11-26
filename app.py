@@ -365,7 +365,12 @@ def update_progress(*checkbox_values):
 # APPLICATION THEME AND STYLING
 # ============================================================
 
-custom_theme = gr.themes.Soft(
+[theme]
+base = "light"
+primaryColor = "#6366f1"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f3f4f6"
+textColor = "#111827"
     primary_hue="green",
     secondary_hue="blue",
     neutral_hue="slate",
