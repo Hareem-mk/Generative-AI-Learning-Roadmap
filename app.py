@@ -1,4 +1,61 @@
+import json
 import streamlit as st
+
+st.session_state.setdefault("import_version", 0)
+st.session_state.setdefault("progress_status_msg", None)
+
+
+def build_progress_json_payload() -> str:
+    """Serializes current checkbox states into a formatted JSON string."""
+    keys = globals().get("ALL_CHECKBOX_KEYS", [])
+    progress_map = {
+        key: bool(st.session_state.get(key, False))
+        for key in keys
+    }
+    completed_count = sum(1 for done in progress_map.values() if done)
+
+    payload = {
+        "app": "Generative AI Learning Roadmap",
+        "version": 1,
+        "completed_topics": completed_count,
+        "total_topics": len(keys),
+        "progress": progress_map,
+    }
+    return json.dumps(payload, indent=2)
+
+
+def restore_progress_from_json(raw_bytes: bytes) -> tuple[bool, str]:
+    """Validates and applies checkbox states from uploaded JSON bytes."""
+    keys = globals().get("ALL_CHECKBOX_KEYS", [])
+    try:
+        data = json.loads(raw_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False, "Invalid JSON file. Please upload a valid progress export."
+
+    if not isinstance(data, dict):
+        return False, "JSON root must be an object."
+
+    raw_progress = data.get("progress") if isinstance(data.get("progress"), dict) else data
+    if not isinstance(raw_progress, dict):
+        return False, "Missing a valid 'progress' mapping in the JSON file."
+
+    valid_keys = set(keys)
+    matched_updates = {
+        key: bool(value)
+        for key, value in raw_progress.items()
+        if key in valid_keys and isinstance(value, bool)
+    }
+
+    if not matched_updates:
+        return False, "No matching roadmap topic keys with boolean values were found."
+
+    for key in keys:
+        st.session_state[key] = False
+
+    for key, value in matched_updates.items():
+        st.session_state[key] = value
+
+    return True, f"Restored progress for {len(matched_updates)} topics."
 
 st.set_page_config(
     page_title="Generative AI Learning Roadmap",
