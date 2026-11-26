@@ -1,5 +1,4 @@
 import json
-import streamlit as st
 
 st.session_state.setdefault("import_version", 0)
 st.session_state.setdefault("progress_status_msg", None)
@@ -33,7 +32,6 @@ def restore_progress_from_json(raw_bytes: bytes) -> tuple[bool, str]:
     if not isinstance(data, dict):
         return False, "JSON root must be an object."
 
-    # Support either {"progress": {...}} or a flat {"completed_1_1": True, ...} dict
     raw_progress = data.get("progress") if isinstance(data.get("progress"), dict) else data
     if not isinstance(raw_progress, dict):
         return False, "Missing a valid 'progress' mapping in the JSON file."
@@ -48,7 +46,6 @@ def restore_progress_from_json(raw_bytes: bytes) -> tuple[bool, str]:
     if not matched_updates:
         return False, "No matching roadmap topic keys with boolean values were found."
 
-    # Reset all keys first so omitted topics don't stay checked from a prior session
     for key in ALL_CHECKBOX_KEYS:
         st.session_state[key] = False
 
@@ -56,3 +53,4 @@ def restore_progress_from_json(raw_bytes: bytes) -> tuple[bool, str]:
         st.session_state[key] = value
 
     return True, f"Restored progress for {len(matched_updates)} topics."
+    
