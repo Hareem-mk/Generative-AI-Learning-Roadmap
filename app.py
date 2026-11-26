@@ -1,5 +1,12 @@
 # 1. Imports
-import gradio as gr
+import streamlit as st
+
+level_selector = st.selectbox(
+    "Level", ["Beginner", "Intermediate", "Advanced"]
+)
+
+# Update displayed sections directly based on level_selector
+st.markdown(f"Showing roadmap for: **{level_selector}**")
 
 # 2. ROADMAP dictionary
 ROADMAP = {
