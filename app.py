@@ -403,3 +403,44 @@ elif level_selector == "Tools Landscape":
         with st.expander(label=category, expanded=False):
             for tool_name, access_type in items:
                 st.markdown(f"### {tool_name}\n\n**Access:** {access_type}\n\n---")
+with right_col:
+    current_states = [bool(st.session_state.get(key, False)) for key in ALL_CHECKBOX_KEYS]
+    st.markdown(build_progress_markdown(current_states))
+
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        st.button(
+            label="Reset All",
+            type="secondary",
+            on_click=reset_all_progress,
+            use_container_width=True,
+        )
+    with btn_col2:
+        st.download_button(
+            label="Save JSON",
+            data=build_progress_json_payload(),
+            file_name="genai_roadmap_progress.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+
+    uploader_key = f"progress_uploader_{st.session_state['import_version']}"
+    uploaded_file = st.file_uploader(
+        label="Restore Progress (JSON)",
+        type=["json"],
+        key=uploader_key,
+        help="Upload a previously exported genai_roadmap_progress.json file.",
+    )
+
+    if uploaded_file is not None:
+        ok, message = restore_progress_from_json(uploaded_file.getvalue())
+        st.session_state["import_version"] += 1
+        st.session_state["progress_status_msg"] = ("success" if ok else "error", message)
+        st.rerun()
+
+    if st.session_state.get("progress_status_msg"):
+        level, msg = st.session_state["progress_status_msg"]
+        if level == "success":
+            st.success(msg)
+        else:
+            st.error(msg)
