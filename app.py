@@ -978,81 +978,50 @@ latest information on the official platform website.
 
 
     # ========================================================
-    # DROPDOWN EVENT
-    # ========================================================
-
-    level_selector.change(
-        fn=change_section,
-        inputs=level_selector,
-        outputs=display_sections
-    )
-
-
-    # ========================================================
-    # PROGRESS EVENTS
-    # ========================================================
-
-    print(
-    "Total checkboxes created:",
-    len(checkbox_components)
+# DROPDOWN EVENT
+# ========================================================
+level_selector.change(
+    fn=change_section,
+    inputs=level_selector,
+    outputs=display_sections,
 )
-    for checkbox in checkbox_components:
 
-        checkbox.change(
-            fn=update_progress,
-            inputs=checkbox_components,
-            outputs=progress_output
-        )
+# ========================================================
+# PROGRESS EVENTS
+# ========================================================
+print("Total checkboxes created:", len(checkbox_components))
 
-
-    # Initial progress display
-
-
-
-    # ========================================================
-    # RESET BUTTON
-    # ========================================================
-
-    reset_button = gr.Button(
-        "Reset All Progress",
-        variant="secondary"
+for checkbox in checkbox_components:
+    checkbox.change(
+        fn=update_progress,
+        inputs=checkbox_components,
+        outputs=progress_output,
     )
 
-    def reset_all():
-        """
-        Clears every checkbox and resets progress.
-        """
+# ========================================================
+# RESET BUTTON
+# ========================================================
+reset_button = gr.Button("Reset All Progress", variant="secondary")
 
-        empty_values = [
-            False
-        ] * len(checkbox_components)
 
-        reset_progress_text = update_progress(
-            *empty_values
-        )
+def reset_all():
+    """Clears every checkbox and resets progress."""
+    num_boxes = len(checkbox_components)
+    empty_values = [False] * num_boxes
+    # If your update_progress function takes N booleans and returns a string/markdown:
+    reset_progress_text = update_progress(*empty_values)
+    return tuple(empty_values) + (reset_progress_text,)
 
-        return (
-            empty_values
-            + [reset_progress_text]
-        )
 
-    reset_button.click(
-        fn=reset_all,
-        inputs=None,
-        outputs=(
-            checkbox_components
-            + [progress_output]
-        )
-    )
-
+reset_button.click(
+    fn=reset_all,
+    inputs=None,
+    outputs=checkbox_components + [progress_output],
+)
 
 # ============================================================
 # LAUNCH APPLICATION
 # ============================================================
-
 if __name__ == "__main__":
-
     # Use this for Google Colab testing:
     app.launch()
-        
-    
